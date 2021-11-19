@@ -3,20 +3,34 @@ package assignment2;
 import javafx.animation.PauseTransition;
 import javafx.geometry.HPos;
 import javafx.geometry.Pos;
+import javafx.scene.Node;
 import javafx.scene.Scene;
 import javafx.scene.control.Button;
 import javafx.scene.control.Label;
 import javafx.scene.control.TextField;
+import javafx.scene.image.Image;
 import javafx.scene.layout.BorderPane;
 import javafx.scene.layout.GridPane;
 import javafx.scene.layout.VBox;
+import javafx.scene.shape.Path;
 import javafx.scene.text.Font;
 import javafx.stage.Stage;
 import javafx.util.Duration;
 
+import java.io.BufferedWriter;
 import java.io.File;
+import java.io.FileNotFoundException;
+import java.io.FileOutputStream;
+import java.io.FilterOutputStream;
+import java.io.IOException;
+import java.io.OutputStream;
+import java.io.OutputStreamWriter;
+import java.io.Writer;
+import java.nio.file.Files;
 import java.text.SimpleDateFormat;
 import java.util.Date;
+
+import javax.crypto.CipherOutputStream;
 
 public class View {
 
@@ -102,6 +116,7 @@ public class View {
      */
     private void showBoard() {
         boardPanel = new BoardPanel(this, model.getBoard());
+        
         undoButton = new Button("Undo move");
         undoButton.setId("UndoButton");   // DO NOT MODIFY ID
         undoButton.setPrefSize(150, 50);
@@ -171,15 +186,69 @@ public class View {
      *
      */
     protected void runMove() { // TODO
+        if(!this.model.getBoard().isGameOver()) {
+            if (this.model.getBoard().getTurn() == Piece.Type.MUSKETEER && this.model.getMusketeerAgent() != null) {
+            
+            try {
+                this.model.move(this.model.getMusketeerAgent());
+                this.setMessageLabel("GUARD");
+                this.boardPanel.updateCells();
+            }
+            catch (Exception e) {
+            	
+            }
+            	
+               
+        }
+            if (this.model.getBoard().getTurn() == Piece.Type.GUARD && this.model.getGuardAgent() != null) {
+            	try {
+                this.model.move(model.getGuardAgent());
+                this.setMessageLabel("GUARD");
+                this.boardPanel.updateCells();
+                
+            	}
+            	catch (Exception e) {
+            		
+            	}
+
+        }
+
+        }
+        else {
+            if (this.model.getBoard().getWinner() == Piece.Type.MUSKETEER) {
+                this.setMessageLabel("MUSKETEERS WiN");
+            }
+            else {
+                this.setMessageLabel("GUARDS WiN");
+            }
+        }
+        this.setUndoButton();
+
+
+
 
     }
 
-    /**
+    /*
      *  Enables or disables the undo button depending on if there are moves to undo
      */
     protected void setUndoButton() { // TODO
 
+    	try {
+        if (model.getMovesSize() !=0) {
+            undoButton.setDisable(false);
+        }
+        if (model.getMovesSize() ==0) {
+            undoButton.setDisable(true);
+        }
+    	}
+    	catch (Exception e) {
+    		
+    	}
+
+
     }
+
 
 
     /**
@@ -188,8 +257,18 @@ public class View {
      * @param mode the selected GameMode
      */
     protected void setGameMode(ThreeMusketeers.GameMode mode) { // TODO
+            gameMode = mode;
+            if ((this.gameMode.name().equals("HumanGreedy"))|| (this.gameMode.name().equals("HumanRandom"))) {
+                this.showSideSelector();
+            }
+            else {
+                this.showBoard();
+                this.setSide(Piece.Type.GUARD);
+                this.setSide(Piece.Type.MUSKETEER);
+     
+            }
 
-    }
+        }
 
     /**
      * Handles setting the correct agents based on the selected GameMode and the player's piece type by
@@ -198,6 +277,9 @@ public class View {
      * @param sideType the selected Piece Type for the human player in Human vs Computer games
      */
     protected void setSide(Piece.Type sideType) { // TODO
+    	this.model.selectMode(gameMode, sideType);
+    	this.showBoard();
+    	
 
     }
 
@@ -207,6 +289,17 @@ public class View {
      * Undoes the latest move
      */
     private void undo() { // TODO
+    	
+
+    	model.undoMove();
+    	this.setUndoButton();
+    	this.boardPanel.updateCells();
+    	if ( this.model.getCurrentAgent() instanceof RandomAgent || this.model.getCurrentAgent() instanceof GreedyAgent){
+            
+    		model.move(model.getCurrentAgent());
+            this.runMove();
+    	}
+    	
 
     }
 
@@ -220,16 +313,51 @@ public class View {
      * Must use saveFileSuccess, saveFileExistsError, or saveFileNotTxtError to set as the text of saveFileErrorLabel
      */
     private void saveBoard() { // TODO
+    	
+    	
+    	this.saveButton.setOnAction(e -> this.saveBoard());
+    	if (this.saveFileNameTextField.getText().endsWith(".txt")){
+    		File file = new File("boards", this.saveFileNameTextField.getText());
+    		try {
+				if (file.createNewFile() == false) {
+					this.saveFileErrorLabel.setText(saveFileExistsError.toString());
+				}
+				
+				else {
+					
+					this.model.getBoard().saveBoard(file);
+					this.saveFileErrorLabel.setText(saveFileSuccess.toString());
+		    		
+				}
+			} catch (Exception e) {
+				
+				e.printStackTrace();
+				
+			}
 
+    	}
+    	else {
+    		this.saveFileErrorLabel.setText(saveFileNotTxtError.toString());
+    	}
+    	
+    	 
     }
-
-    /**
-     * The handler for the New Game button
-     * Restarts the game and updates the view accordingly
-     * A new game is created and the main menu must be shown again
-     */
+    
+    	
+    
     private void restart() { // TODO
+    	
+    	
+    	this.initUI();
+        stage.setTitle("Three Musketeers");
+        stage.setMinHeight(900);
+        stage.setMinWidth(600);
+        stage.getIcons().add(new Image("file:images/musketeer.png"));
 
+        this.model = new ThreeMusketeers();
+       this.stage = stage;
+    	
+    	
     }
 
     /**

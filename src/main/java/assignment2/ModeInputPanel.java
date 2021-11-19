@@ -15,6 +15,13 @@ import java.nio.file.DirectoryStream;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
+import  java.io.FileFilter;
+import   javax.swing.filechooser.FileNameExtensionFilter;
+
+import java.io.File;
+import java.io.FilenameFilter;
+ 
+
 
 public class ModeInputPanel extends GridPane {
     private final View view;
@@ -97,15 +104,56 @@ public class ModeInputPanel extends GridPane {
      * @return the index in the listView of Starter.txt
      */
     private int getFiles(ListView<String> listView) { // TODO
-        return 0;
-    }
+  
+    	
+    	int i = 0;
+    	int starterFile = 0;
 
+    	        // Creates an array in which we will store the names of files and directories
+    	        String[] pathnames;
+
+    	        // Creates a new File instance by converting the given pathname string
+    	        // into an abstract pathname
+    	        File f = new File("boards");
+
+    	        // Populates the array with names of files and directories
+    	        pathnames = f.list();
+
+    	        // For each pathname in the pathnames array
+    	        for (String pathname : pathnames) {
+    	        	i = i + 1;
+    	        	listView.getItems().add(pathname);
+    	            // Print the names of files and directories
+    	            if (pathname == "Starter.txt") {
+    	            	starterFile = i;
+    	            	
+    	            }
+    	        }
+    return starterFile;	    
+    }
     /**
      * Loads the board file selected in the boardsList and updates the selectBoardLabel with the name of the new Board file
      * @param selectBoardLabel a message Label to update which board is currently selected
      * @param boardsList a ListView populated with boards to load
      */
     private void selectBoard(Label selectBoardLabel, ListView<String> boardsList) { // TODO
+    	
+    	String item = boardsList.getSelectionModel().getSelectedItem();
+        // Creates an array in which we will store the names of files and directories
+    	File f = new File("boards");
+    	File[] hi = f.listFiles();
+    	for (File x : hi) {
+    		System.out.println(x.getName().toString());
+    		System.out.println(item);
+    		System.out.println(x.getName().toString().equals(item));
+    		if (x.getName().toString().equals(item)) {
+    			
+    			this.view.model.setBoard(x);
+    		}
+    	}
 
+    	
+    	
+    	selectBoardLabel.setText(item);
     }
 }
