@@ -172,6 +172,7 @@ public class View {
      * @param messageLabel String to use for the text of the messageLabel
      */
     protected void setMessageLabel(String messageLabel) {
+
         this.messageLabel.setText(messageLabel);
     }
 
@@ -186,15 +187,17 @@ public class View {
      *
      */
     protected void runMove() { // TODO
+    	this.setUndoButton();
         if(!this.model.getBoard().isGameOver()) {
             if (this.model.getBoard().getTurn() == Piece.Type.MUSKETEER && this.model.getMusketeerAgent() != null) {
             
             try {
                 this.model.move(this.model.getMusketeerAgent());
-                this.setMessageLabel("GUARD");
+                this.setMessageLabel("MUSKETEER");
                 this.boardPanel.updateCells();
             }
             catch (Exception e) {
+            	this.setMessageLabel("MUSKETEER");
             	
             }
             	
@@ -208,22 +211,23 @@ public class View {
                 
             	}
             	catch (Exception e) {
+            		this.setMessageLabel("GUARD");
             		
             	}
 
         }
 
-        }
-        else {
-            if (this.model.getBoard().getWinner() == Piece.Type.MUSKETEER) {
-                this.setMessageLabel("MUSKETEERS WiN");
-            }
-            else {
-                this.setMessageLabel("GUARDS WiN");
-            }
-        }
-        this.setUndoButton();
-
+	        }
+	        else {
+	            if (this.model.getBoard().getWinner() == Piece.Type.MUSKETEER) {
+	                this.setMessageLabel("MUSKETEERS WIN");
+	            }
+	            else {
+	                this.setMessageLabel("GUARDS WIN");
+	            }
+	        }
+	        
+	
 
 
 
@@ -261,10 +265,11 @@ public class View {
             if ((this.gameMode.name().equals("HumanGreedy"))|| (this.gameMode.name().equals("HumanRandom"))) {
                 this.showSideSelector();
             }
-            else {
-                this.showBoard();
+            if (this.gameMode.name().equals("Human")) {
                 this.setSide(Piece.Type.GUARD);
                 this.setSide(Piece.Type.MUSKETEER);
+                this.showBoard();
+
      
             }
 
@@ -291,16 +296,22 @@ public class View {
     private void undo() { // TODO
     	
 
-    	model.undoMove();
-    	this.setUndoButton();
-    	this.boardPanel.updateCells();
-    	if ( this.model.getCurrentAgent() instanceof RandomAgent || this.model.getCurrentAgent() instanceof GreedyAgent){
-            
-    		model.move(model.getCurrentAgent());
-            this.runMove();
-    	}
+    	this.model.undoMove();
     	
-
+    	
+    	if ( this.model.getCurrentAgent() instanceof RandomAgent || this.model.getCurrentAgent() instanceof GreedyAgent){
+            if (this.model.getBoard().getTurn() == Piece.Type.MUSKETEER) {
+    		this.model.move(model.getMusketeerAgent());
+            
+            }
+            if (this.model.getBoard().getTurn() == Piece.Type.GUARD) {
+            	this.model.move(model.getGuardAgent());
+            	
+            }
+        	runMove();
+    	}
+    
+    	this.boardPanel.updateCells();
     }
 
     /**
@@ -324,9 +335,9 @@ public class View {
 				}
 				
 				else {
-					
-					this.model.getBoard().saveBoard(file);
 					this.saveFileErrorLabel.setText(saveFileSuccess.toString());
+					this.model.getBoard().saveBoard(file);
+					
 		    		
 				}
 			} catch (Exception e) {

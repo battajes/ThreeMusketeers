@@ -143,9 +143,6 @@ public class ModeInputPanel extends GridPane {
     	File f = new File("boards");
     	File[] hi = f.listFiles();
     	for (File x : hi) {
-    		System.out.println(x.getName().toString());
-    		System.out.println(item);
-    		System.out.println(x.getName().toString().equals(item));
     		if (x.getName().toString().equals(item)) {
     			
     			this.view.model.setBoard(x);

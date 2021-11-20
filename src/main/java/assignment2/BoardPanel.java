@@ -97,7 +97,7 @@ public class BoardPanel extends GridPane implements EventHandler<ActionEvent> {
     		x.setDisable(true);
     		try {
     		 if (((this.view.model.getCurrentAgent() instanceof HumanAgent)) && (!this.view.model.getBoard().getPossibleDestinations(x).isEmpty() )) {
-    			 //System.out.println(this.board.getTurn());
+    	
     			 if (this.rightTurn(x)) {
     				 x.setDisable(false);
     			 }
@@ -143,16 +143,17 @@ public class BoardPanel extends GridPane implements EventHandler<ActionEvent> {
     	if (!this.clicked &&  this.isValidCell((Cell)actionEvent.getSource())) {
     		this.clicked = true;
     		this.movefrom = (Cell) actionEvent.getSource();
-    		this.updateCells();
+    		
     		
 	}
 	if (this.clicked && this.possibledest(this.movefrom, (Cell)actionEvent.getSource())) {
-			view.model.move(new Move( this.movefrom, (Cell) actionEvent.getSource()));
+			this.view.model.move(new Move( this.movefrom, (Cell) actionEvent.getSource()));
 			this.clicked = false;
 			
 
-			updateCells();
+			
 		}
+	this.updateCells();
     
     }
     
